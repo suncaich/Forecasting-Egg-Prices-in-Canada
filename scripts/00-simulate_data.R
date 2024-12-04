@@ -2,7 +2,7 @@
 # Purpose: Simulates a dataset of Australian electoral divisions, including the 
 #          state and party that won each division.
 # Author: Caichen Sun
-# Date: 26 September 2024
+# Date: 1 December 2024
 # Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: The `tidyverse` package must be installed.

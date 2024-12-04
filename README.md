@@ -55,9 +55,7 @@ Aspects of the code and documentation were developed with the assistance of AI t
 1. Clone the repository.
 2. Navigate to the `scripts/` directory.
 3. Execute the cleaning and analysis scripts in sequence:
-   ```bash
-   Rscript data_cleaning.R
-   Rscript regression_analysis.R
+
    
 ## For LLM Usage
 

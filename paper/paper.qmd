@@ -107,7 +107,7 @@ ggplot(cleaned_data %>%
 **product_name**: Includes the specific names given to egg products, such as descriptors indicating whether the eggs are whole, liquid, or processed in other forms. This variable is key to differentiating product types within the category and analyzing pricing by product type.
 
 
-The graph presented in Figure (@fig-AverageOldPrice) illustrates the trends in the average old price per month from February to November 2024. This chart shows a volatile pattern, beginning with a slight increase followed by a dip in April, after which the prices gradually recover and escalate significantly from July onwards, peaking in October. The fluctuations suggest a dynamic market behavior that might be driven by seasonal demand or supply changes, promotional activities, or macroeconomic conditions."
+The graph presented in (@fig-AverageOldPrice) illustrates the trends in the average old price per month from February to November 2024. This chart shows a volatile pattern, beginning with a slight increase followed by a dip in April, after which the prices gradually recover and escalate significantly from July onwards, peaking in October. The fluctuations suggest a dynamic market behavior that might be driven by seasonal demand or supply changes, promotional activities, or macroeconomic conditions."
 
 ```{r}
 #| label: fig-AverageOldPrice
@@ -124,7 +124,7 @@ ggplot(cleaned_data %>%
 ```
 
 
-Figure @fig-AveragePriceDifference showcases a comprehensive view of the monthly average price differences for the year 2024, using dual visualization techniques to highlight the data's dynamics.  The line graph in the upper section captures the fluctuating nature of the price differences, starting with a notable decrease from February to April.  This period may reflect a strategic adjustment in pricing policies or a market reaction to external economic pressures.  The prices stabilize somewhat in the middle months, indicating a period of market correction or adaptation to consumer behaviors.
+ @fig-AveragePriceDifference showcases a comprehensive view of the monthly average price differences for the year 2024, using dual visualization techniques to highlight the data's dynamics.  The line graph in the upper section captures the fluctuating nature of the price differences, starting with a notable decrease from February to April.  This period may reflect a strategic adjustment in pricing policies or a market reaction to external economic pressures.  The prices stabilize somewhat in the middle months, indicating a period of market correction or adaptation to consumer behaviors.
 
 As the year progresses, the data reveals a dramatic spike in price differences beginning in October, peaking sharply in November.  This upward trend could be associated with increased consumer activity during the holiday season, or possibly supply constraints driving prices upward.  The corresponding bar graph below serves to emphasize these fluctuations by presenting the data in a segmented format, which allows for a clear comparison of month-to-month changes in price differences.  Each bar graphically represents the magnitude of change, making the relative stability of the summer months and the volatile movements in the later months particularly evident.
 
@@ -199,7 +199,7 @@ The intersection of the two curves represents price points that are consistent b
 
 
 
-The boxplot depicted in Figure @fig-BoxplotVendors provides a detailed comparative analysis of the distribution of current prices by different vendors: Loblaws, Metro, NoFrills, and Walmart. The visualization employs different colors to differentiate each vendor, which helps in quickly assessing the pricing landscape as outlined by their respective market positioning.
+The boxplot depicted in @fig-BoxplotVendors provides a detailed comparative analysis of the distribution of current prices by different vendors: Loblaws, Metro, NoFrills, and Walmart. The visualization employs different colors to differentiate each vendor, which helps in quickly assessing the pricing landscape as outlined by their respective market positioning.
 
 Detailed Analysis:
 
@@ -225,7 +225,7 @@ ggplot(cleaned_data, aes(x = vendor, y = current_price, fill = vendor)) +
 
 ```
 
-The bar chart in Figure @fig-BarchartBrands illustrates the average current prices of various egg brands, showing significant price variation across different brands. The chart is organized in ascending order of price from left to right, offering a visual comparison of brand pricing strategies within the market.
+The bar chart in @fig-BarchartBrands illustrates the average current prices of various egg brands, showing significant price variation across different brands. The chart is organized in ascending order of price from left to right, offering a visual comparison of brand pricing strategies within the market.
 
 Detailed Analysis:
 
@@ -263,9 +263,6 @@ ggplot(brand_price, aes(x = reorder(brand, Average_Current_Price), y = Average_C
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
 
 ## Model set-up
 

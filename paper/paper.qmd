@@ -3,7 +3,7 @@ title: "Influences on Egg Pricing: The Role of Brands and Vendors in Canadian Re
 subtitle: "Seasonal Trends and Strategic Impacts Revealed"
 author: 
   - Caichen sun
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+thanks: "Code and data are available at: https://github.com/suncaich/Forecasting-Egg-Prices-in-Canada.git
 date: today
 date-format: long
 abstract: "This study examines the factors influencing egg prices across major Canadian grocery stores, using a linear regression model to analyze transaction data over an eight-month period. It was found that brand recognition and vendor strategies significantly affect pricing, with premium brands consistently commanding higher prices and seasonal trends impacting vendor pricing adjustments. These findings underscore the importance of strategic brand management and the need for responsive pricing strategies in the retail sector. The insights provided by this research help consumers and policymakers understand how pricing decisions are made in the retail market, highlighting the influence of brand and vendor strategies on everyday consumer costs.."

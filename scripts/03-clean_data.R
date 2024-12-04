@@ -1,44 +1,47 @@
 #### Preamble ####
-# Purpose: Cleans the raw plane data recorded by two observers..... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 6 April 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Cleans the raw product data and prepares it for analysis.
+# Author: Caichen Sun
+# Date: 3 December 2024
+# Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: 
+#   - Raw data files must be available in the 'data/01-raw_data/' directory.
+#   - Required R libraries (`tidyverse`, `dplyr`, `arrow`, `lubridate`, `here`) must be installed.
 
 #### Workspace setup ####
 library(tidyverse)
+library(dplyr)
+library(arrow)
+library(lubridate)
+library(here)
 
-#### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
+#### Load raw data ####
+raw_data <- read_csv("data/01-raw_data/hammer-4-raw.csv")
+product_data <- read_csv("data/01-raw_data/hammer-4-product.csv")
 
-cleaned_data <-
-  raw_data |>
-  janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
+#### Combine and clean data ####
+clean_data <- raw_data %>%
+  left_join(product_data, by = c("product_id" = "id")) %>%
+  select(nowtime, current_price, old_price, price_per_unit, product_name, brand, vendor) %>%
+  filter(
+    str_detect(product_name, "Eggs") & 
+      !str_detect(product_name, "Chocolate|Candy|Kinder|Cadbury|Eggies|Mini|Decorating|Creme|Toy|Plush|Quail|Duck|Hot Sauce|Sauce|Biscuit|Gummy|Fried|Mayonnaise|Oatmeal|Joint Care|Fish|Plate|Bowl|Potatoes|Pickled|Preserved|Marinated|Tea|Pepper|Boiled|Yolk") &
+      vendor %in% c("Loblaws", "Metro", "Walmart", "NoFrills")
+  ) %>%
   mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
-  ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
+    current_price = as.numeric(current_price),
+    old_price = as.numeric(old_price)
+  ) %>%
+  filter(!is.na(current_price) & !is.na(old_price)) %>%
   mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
-  ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+    nowtime = as.POSIXct(nowtime, tz = "UTC"),
+    year_month = format(nowtime, "%Y-%m"),
+    price_diff = current_price - old_price
+  ) %>%
+  select(year_month, current_price, old_price, price_diff, product_name, brand, vendor)
 
-#### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+
+
+#### Save cleaned data ####
+write_csv(clean_data, "data/02-analysis_data/analysis_data.csv")
+write_parquet(clean_data, "data/02-analysis_data/analysis_data.parquet")

@@ -1,37 +1,34 @@
 #### Preamble ####
-# Purpose: Models... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Models current price prediction based on historical data and contextual factors.
+# Author: Caichen Sun
+# Date: 3 December 2024
+# Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
-
+# Pre-requisites: 
+#   - Requires cleaned analysis data in 'data/02-analysis_data/' directory.
+#   - Required R libraries (`tidyverse`, `lubridate`, `arrow`) must be installed.
 
 #### Workspace setup ####
 library(tidyverse)
-library(rstanarm)
+library(lubridate)
+library(arrow)
 
 #### Read data ####
-analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
+data <- read_parquet("data/02-analysis_data/analysis_data.parquet")
 
-### Model data ####
-first_model <-
-  stan_glm(
-    formula = flying_time ~ length + width,
-    data = analysis_data,
-    family = gaussian(),
-    prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
-    seed = 853
-  )
+#### Prepare data for modeling ####
+# Extract month as a factor variable from year_month
 
+
+#### Model data ####
+# Linear regression model predicting current price based on old price, month, brand, and vendor
+model <- lm(current_price ~ old_price + year_month + brand + vendor, data = data)
+
+# Model summary
+summary(model)
 
 #### Save model ####
 saveRDS(
-  first_model,
+  model,
   file = "models/first_model.rds"
 )
-
-

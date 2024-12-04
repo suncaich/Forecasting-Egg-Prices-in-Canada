@@ -1,89 +1,71 @@
 #### Preamble ####
 # Purpose: Tests the structure and validity of the simulated Australian 
-  #electoral divisions dataset.
-# Author: Rohan Alexander
+#          electoral divisions dataset.
+# Author: Caichen Sun
 # Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
+# Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 
-  # - The `tidyverse` package must be installed and loaded
-  # - 00-simulate_data.R must have been run
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+#   - The `tidyverse` package must be installed and loaded.
+#   - `00-simulate_data.R` must have been run.
+# Any other information needed? Ensure that you are in the `starter_folder` R project.
 
 
 #### Workspace setup ####
-library(tidyverse)
+library(testthat)
+library(dplyr)
+library(readr)
 
-analysis_data <- read_csv("data/00-simulated_data/simulated_data.csv")
+simulated_data <- read_csv("data/00-simulated_data/simulated_data.csv")
 
-# Test if the data was successfully loaded
-if (exists("analysis_data")) {
-  message("Test Passed: The dataset was successfully loaded.")
-} else {
-  stop("Test Failed: The dataset could not be loaded.")
-}
+# Start writing tests
 
+# Test 1: Check that the dataset has the correct number of rows
+# Ensuring the data was generated with the expected number of records
+test_that("Data has the correct number of rows", {
+  expect_equal(nrow(simulated_data), 2500)  # Adjust the number as per your data specifics
+})
 
-#### Test data ####
+# Test 2: Validate vendor column values
+# Verifying that the vendor names in the dataset only include the expected predefined values
+test_that("Vendor column contains only predefined values", {
+  predefined_vendors <- c("Loblaws", "TandT", "NoFrills")  # Update with the correct list of vendors
+  expect_true(all(simulated_data$vendor %in% predefined_vendors))
+})
 
-# Check if the dataset has 151 rows
-if (nrow(analysis_data) == 151) {
-  message("Test Passed: The dataset has 151 rows.")
-} else {
-  stop("Test Failed: The dataset does not have 151 rows.")
-}
+# Test 3: Check data types for price columns
+# Ensuring that the price information is stored as numeric data for proper calculations and comparisons
+test_that("Price columns are numeric", {
+  expect_type(simulated_data$current_price, "double")
+  expect_type(simulated_data$old_price, "double")
+})
 
-# Check if the dataset has 3 columns
-if (ncol(analysis_data) == 3) {
-  message("Test Passed: The dataset has 3 columns.")
-} else {
-  stop("Test Failed: The dataset does not have 3 columns.")
-}
+# Test 4: Validate month column values
+# Ensuring the 'month' column only contains values that represent actual months of the year
+test_that("Month column contains values from 1 to 12", {
+  expect_true(all(simulated_data$month %in% 1:12))
+})
 
-# Check if all values in the 'division' column are unique
-if (n_distinct(analysis_data$division) == nrow(analysis_data)) {
-  message("Test Passed: All values in 'division' are unique.")
-} else {
-  stop("Test Failed: The 'division' column contains duplicate values.")
-}
+# Test 5 to verify that no prices are negative
+test_that("No negative prices", {
+  expect_true(all(simulated_data$current_price >= 0))
+  expect_true(all(simulated_data$old_price >= 0))
+})
 
-# Check if the 'state' column contains only valid Australian state names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", 
-                  "Western Australia", "Tasmania", "Northern Territory", 
-                  "Australian Capital Territory")
+# Test 6 to verify that no prices are negative
+test_that("No negative prices", {
+  expect_true(all(simulated_data$current_price >= 0))
+  expect_true(all(simulated_data$old_price >= 0))
+})
 
-if (all(analysis_data$state %in% valid_states)) {
-  message("Test Passed: The 'state' column contains only valid Australian state names.")
-} else {
-  stop("Test Failed: The 'state' column contains invalid state names.")
-}
+# Test 7 to check that product names, brands, and vendors are within the expected set of categories
+test_that("Valid categories for names, brands, and vendors", {
+  expected_product_names <- c("Egg Regular", "Egg Organic", "Egg Free Range")
+  expected_brands <- c("Brand A", "Brand B", "Brand C")
+  expected_vendors <- c("Loblaws", "TandT", "NoFrills")
+  
+  expect_true(all(simulated_data$product_name %in% expected_product_names))
+  expect_true(all(simulated_data$brand %in% expected_brands))
+  expect_true(all(simulated_data$vendor %in% expected_vendors))
+})
 
-# Check if the 'party' column contains only valid party names
-valid_parties <- c("Labor", "Liberal", "Greens", "National", "Other")
-
-if (all(analysis_data$party %in% valid_parties)) {
-  message("Test Passed: The 'party' column contains only valid party names.")
-} else {
-  stop("Test Failed: The 'party' column contains invalid party names.")
-}
-
-# Check if there are any missing values in the dataset
-if (all(!is.na(analysis_data))) {
-  message("Test Passed: The dataset contains no missing values.")
-} else {
-  stop("Test Failed: The dataset contains missing values.")
-}
-
-# Check if there are no empty strings in 'division', 'state', and 'party' columns
-if (all(analysis_data$division != "" & analysis_data$state != "" & analysis_data$party != "")) {
-  message("Test Passed: There are no empty strings in 'division', 'state', or 'party'.")
-} else {
-  stop("Test Failed: There are empty strings in one or more columns.")
-}
-
-# Check if the 'party' column has at least two unique values
-if (n_distinct(analysis_data$party) >= 2) {
-  message("Test Passed: The 'party' column contains at least two unique values.")
-} else {
-  stop("Test Failed: The 'party' column contains less than two unique values.")
-}

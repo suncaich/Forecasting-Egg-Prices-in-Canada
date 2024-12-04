@@ -1,52 +1,41 @@
 #### Preamble ####
 # Purpose: Simulates a dataset of Australian electoral divisions, including the 
-  #state and party that won each division.
-# Author: Rohan Alexander
+#          state and party that won each division.
+# Author: Caichen Sun
 # Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
+# Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: The `tidyverse` package must be installed
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+# Pre-requisites: The `tidyverse` package must be installed.
+#                 Ensure that you are in the `starter_folder` R project.
 
 
 #### Workspace setup ####
 library(tidyverse)
-set.seed(853)
+
+set.seed(123)
 
 
 #### Simulate data ####
-# State names
-states <- c(
-  "New South Wales",
-  "Victoria",
-  "Queensland",
-  "South Australia",
-  "Western Australia",
-  "Tasmania",
-  "Northern Territory",
-  "Australian Capital Territory"
-)
+# Simulating current and old price data
+current_price <- runif(2500, min = 0.33, max = 69.99)
+old_price <- runif(2500, min = 0.55, max = 76.99)
 
-# Political parties
-parties <- c("Labor", "Liberal", "Greens", "National", "Other")
+# Generating random months
+month <- sample(1:12, 2500, replace = TRUE)
 
-# Create a dataset by randomly assigning states and parties to divisions
-analysis_data <- tibble(
-  division = paste("Division", 1:151),  # Add "Division" to make it a character
-  state = sample(
-    states,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.25, 0.25, 0.15, 0.1, 0.1, 0.1, 0.025, 0.025) # Rough state population distribution
-  ),
-  party = sample(
-    parties,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.40, 0.40, 0.05, 0.1, 0.05) # Rough party distribution
-  )
-)
+# Simulating character data with sample product names, brands, and vendors
+product_names <- c("Egg Regular", "Egg Organic", "Egg Free Range")
+brands <- c("Brand A", "Brand B", "Brand C")
+vendors <- c("Loblaws", "TandT", "NoFrills")
 
+product_name <- sample(product_names, 2500, replace = TRUE)
+brand <- sample(brands, 2500, replace = TRUE)
+vendor <- sample(vendors, 2500, replace = TRUE)
 
-#### Save data ####
-write_csv(analysis_data, "data/00-simulated_data/simulated_data.csv")
+# Creating a tibble instead of a data frame
+simulate_data <- tibble(current_price, old_price, product_name, brand, vendor, month)
+
+# Viewing the structure of the simulated data
+print(simulate_data)
+
+write_csv(simulate_data, "data/00-simulated_data/simulated_data.csv")

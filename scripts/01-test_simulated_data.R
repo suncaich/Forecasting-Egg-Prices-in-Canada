@@ -2,7 +2,7 @@
 # Purpose: Tests the structure and validity of the simulated Australian 
 #          electoral divisions dataset.
 # Author: Caichen Sun
-# Date: 26 September 2024
+# Date: 1 December 2024
 # Contact: caichen.sun@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 

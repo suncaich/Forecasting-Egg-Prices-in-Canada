@@ -1,16 +1,16 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Influences on Egg Pricing: The Role of Brands and Vendors in Canadian Retail"
+subtitle: "Seasonal Trends and Strategic Impacts Revealed"
 author: 
-  - First author
-  - Another author
+  - Caichen sun
 thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This study examines the factors influencing egg prices across major Canadian grocery stores, using a linear regression model to analyze transaction data over an eight-month period. It was found that brand recognition and vendor strategies significantly affect pricing, with premium brands consistently commanding higher prices and seasonal trends impacting vendor pricing adjustments. These findings underscore the importance of strategic brand management and the need for responsive pricing strategies in the retail sector. The insights provided by this research help consumers and policymakers understand how pricing decisions are made in the retail market, highlighting the influence of brand and vendor strategies on everyday consumer costs.."
 format: pdf
 number-sections: true
 bibliography: references.bib
+echo: false
 ---
 
 ```{r}
@@ -19,95 +19,246 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(dplyr)
+library(arrow)
+library(lubridate)
+library(here)
+library(arrow)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(gridExtra)
+library(readr)
+
+library(broom)
+library(knitr)
+library(kableExtra)
+
+# load data
+cleaned_data <- read_parquet(here::here("data/02-analysis_data/analysis_data.parquet"))
 ```
 
 
 # Introduction
 
-Overview paragraph
+In today's economic environment, characterized by global market volatility and fluctuating supply chains, understanding the pricing dynamics of everyday commodities is crucial. This study examines the determinants of egg prices in the Canadian retail market, a critical segment due to its essential nature and economic sensitivity. Despite extensive research on retail pricing, there remains a significant gap regarding the combined effects of brand influence, vendor strategies, and seasonal variations within Canada. This paper addresses this gap by employing a linear regression model to analyze data from Jacob Filipp’s publicly accessible grocery dataset [@Filipp], which includes detailed transaction records over an eight-month period.
 
-Estimand paragraph
+The analysis reveals that brand recognition has a significant impact on pricing, with premium brands maintaining higher prices. Furthermore, vendor strategies and seasonal trends critically influence price adjustments in response to market and supply conditions. These findings offer nuanced insights into market responsiveness and are crucial for retailers aiming to optimize pricing strategies and for policymakers focused on consumer protection.
 
-Results paragraph
-
-Why it matters paragraph
-
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
+The paper is structured to provide a detailed account of the methodology and data sources in the subsequent section, followed by a comprehensive analysis of the findings. The conclusion synthesizes these insights, discusses potential study limitations, and suggests directions for future research. This approach not only fills a significant gap in the existing literature but also enhances our understanding of economic factors influencing retail pricing in a volatile market.
 
 
 # Data {#sec-data}
 
 ## Overview
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+The data used in this analysis comes from Jacob Filipp's publicly available groceries dataset [@Filipp]. The analysis utilizes the statistical programming language R [@citeR] and several key packages from the R ecosystem. For data manipulation and transformation, the analysis employs tidyverse [@tidyverse], dplyr [@dplyr], and arrow [@arrow]. Date handling is managed through the lubridate [@lubridate] package, while data visualization is accomplished using ggplot2 [@ggplot2] and gridExtra [@gridExtra]. Data import functionality is provided by readr [@readr], and testing is implemented using testthat [@testthat].
 
-Overview text
+The dataset captures grocery purchasing information spanning from February 28, 2024 to November 13, 2024, providing approximately 8.5 months of transaction data. This contemporary dataset allows for analysis of recent consumer purchasing patterns and price trends in the grocery retail sector.
+
 
 ## Measurement
 	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+The Project Hammer data collection process employs a systematic approach to monitor pricing trends in the Canadian grocery market and organize the information into a well-structured dataset. The data is predominantly gathered through automated web scraping from the online platforms of major grocery retailers, capturing real-time price variations for a wide range of products. Vendors include notable names like Voilà, T&T, Loblaws, No Frills, Metro, Galleria, Walmart, and Save-On-Foods. Each dataset entry represents a timestamped record of the listed price, marked as "nowtime," along with details such as the vendor, product ID, product name, brand, unit of measurement, and both current and historical prices. This approach adds a temporal dimension to the data, enabling the study of pricing patterns, marketing strategies, and competitive dynamics across various regions and timeframes. The automated nature of the process ensures regular updates and consistent data quality, creating a reliable resource for analyzing market trends and informing practical decisions.
+
+## Clean Data
+The cleaned dataset was prepared using a series of data manipulation steps implemented in R, leveraging libraries such as tidyverse [@tidyverse], dplyr [@dplyr], arrow [@arrow], and lubridate [@lubridate]. Initially, raw data were sourced from two CSV files: hammer-4-raw.csv and hammer-4-product.csv. These datasets were combined using a left join operation on the product_id and id fields, resulting in a dataset that included various product attributes such as current and historical prices, product name, brand, and vendor.
+
+To refine the dataset for analysis, products were filtered to include only those with names containing "Eggs" or "Egg", excluding any products associated with a wide range of non-relevant terms (e.g., "Chocolate", "Candy", "Toy"). Further, the dataset was limited to products sold by specific vendors—Loblaws, T&T, and NoFrills—known for their relevance in the analysis context.
+
+The dataset was then cleansed to ensure that both the current_price and old_price fields contained non-missing numeric values. Additionally, a new variable month was created from the nowtime timestamp to facilitate temporal analysis.
+
+The final cleaned dataset consists of selected attributes (year_month, current and old prices,  product name, brand, and vendor) and is stored in both CSV and Parquet formats [@arrow] to support subsequent analytical procedures. This data preparation phase ensures that the dataset is optimally structured for detailed examination of price trends and product availability over time.
 
 ## Outcome variables
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+**current_price**: This variable captures the current market price of eggs at the time of data extraction. It is crucial for assessing the immediate pricing environment and evaluating how prices are positioned relative to historical prices. Analyzing this variable helps understand the current economic factors influencing egg prices.
 
 
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
-
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+The graph depicted in (@fig-AverageCurrentPrice) illustrates the monthly trends in the average current price from February to November 2024, reflecting the dynamics within the market. Initially, there is a noticeable decline in average prices from February, starting at approximately 6.2 units, to a low point in June at just above 5.6 units. This downward trend suggests a possible seasonal influence or a response to market oversupply. From July onwards, there is a gradual recovery in prices, which stabilizes through August and early September. Notably, a sharp increase occurs from September to November, where prices soar to over 6.4 units. This sudden rise may be indicative of increased demand or reduced supply, highlighting the importance of further investigation into market conditions and external factors such as economic policies or global events that could influence these fluctuations.
 
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-AverageCurrentPrice
+#| fig-cap: "This graph displays the average current price per month from February to November 2024, illustrating significant fluctuations throughout the year."
 #| echo: false
-#| warning: false
-#| message: false
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+ggplot(cleaned_data %>%
+                    group_by(year_month) %>%
+                    summarise(AverageCurrentPrice = mean(current_price, na.rm=TRUE)), aes(x=year_month, y=AverageCurrentPrice)) +
+  geom_line(aes(group=1), color="blue", size=1) +
+  geom_point(color="darkblue") +
+  labs(title="Average Current Price Per Month", x="Month", y="Average Current Price") +
+  theme_minimal()
 ```
 
-Talk way more about it. 
 
 ## Predictor variables
 
-Add graphs, tables and text.
 
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+**year_month**: Derived from the nowtime timestamp, this variable is formatted as "YYYY-MM" and captures the specific month and year when each data record was collected, specifically within the year 2024. This segmentation allows for a concentrated analysis of price trends and market behaviors over the course of a single year, highlighting how seasonal factors, marketing campaigns, and other temporal events influence pricing and consumer decisions during different months of 2024. The extraction of year_month from nowtime ensures precision in time-related analyses, making it possible to trace and understand the nuances of market dynamics and pricing strategies within a defined annual scope. This approach is particularly useful for identifying periods of high fluctuation or stability in prices, facilitating targeted business strategies and economic forecasting.
+
+**vendor**: This variable represents the grocery store where the data was collected, specifically Loblaws, Metro, Walmart, and NoFrills. These vendors were chosen from the original dataset, which included a broader range of supermarkets, to focus on stores with significant market presence and diverse customer bases. As a predictor variable, vendor is critical for analyzing how pricing strategies vary across different retailers within the same market. Each vendor may have unique pricing models, promotional strategies, and supply chain dynamics, which can significantly influence the current price of egg products. By including this variable, the analysis can explore the extent to which vendor-specific factors contribute to price variations and consumer purchasing behavior.
+
+**brand**: The brand associated with the egg products, which can vary from premium to store brands. Analyzing this variable helps understand brand influence on pricing and consumer preference, particularly across different market segments.
+
+**old_price**: Represents the price before any current updates, allowing for analysis of historical pricing trends and their influence on current prices. This variable can help identify patterns in pricing strategies, such as frequent discounts or price hikes, and their effects on consumer demand.
+
+**product_name**: Includes the specific names given to egg products, such as descriptors indicating whether the eggs are whole, liquid, or processed in other forms. This variable is key to differentiating product types within the category and analyzing pricing by product type.
+
+
+The graph presented in Figure (@fig-AverageOldPrice) illustrates the trends in the average old price per month from February to November 2024. This chart shows a volatile pattern, beginning with a slight increase followed by a dip in April, after which the prices gradually recover and escalate significantly from July onwards, peaking in October. The fluctuations suggest a dynamic market behavior that might be driven by seasonal demand or supply changes, promotional activities, or macroeconomic conditions."
+
+```{r}
+#| label: fig-AverageOldPrice
+#| fig-cap: "The plot demonstrates the monthly progression of average old prices throughout 2024, characterized by notable volatility and a sharp rise in the latter half of the year, emphasizing the instability and reactive nature of the market."
+#| echo: false
+
+ggplot(cleaned_data %>%
+                    group_by(year_month) %>%
+                    summarise(AverageOldPrice = mean(old_price, na.rm=TRUE)), aes(x=year_month, y=AverageOldPrice)) +
+  geom_line(aes(group=1), color="green", size=1) +
+  geom_point(color="blue") +
+  labs(title="Average Old Price Per Month", x="Month", y="Average Old Price") +
+  theme_minimal()
+```
+
+
+Figure @fig-AveragePriceDifference showcases a comprehensive view of the monthly average price differences for the year 2024, using dual visualization techniques to highlight the data's dynamics.  The line graph in the upper section captures the fluctuating nature of the price differences, starting with a notable decrease from February to April.  This period may reflect a strategic adjustment in pricing policies or a market reaction to external economic pressures.  The prices stabilize somewhat in the middle months, indicating a period of market correction or adaptation to consumer behaviors.
+
+As the year progresses, the data reveals a dramatic spike in price differences beginning in October, peaking sharply in November.  This upward trend could be associated with increased consumer activity during the holiday season, or possibly supply constraints driving prices upward.  The corresponding bar graph below serves to emphasize these fluctuations by presenting the data in a segmented format, which allows for a clear comparison of month-to-month changes in price differences.  Each bar graphically represents the magnitude of change, making the relative stability of the summer months and the volatile movements in the later months particularly evident.
+
+Both graphical representations underscore the significant volatility within the market across 2024, suggesting that pricing strategies were likely influenced by a combination of economic conditions, consumer demand, and possibly promotional campaigns.  The dual-graph format effectively conveys the temporal trends and highlights the significant shifts in market behavior, providing a visually compelling narrative of how average price differences evolved throughout the year.
+
+```{r}
+#| label: fig-AveragePriceDifference
+#| fig-cap: "Figure @fig-AveragePriceDifference: This composite graph illustrates the monthly average price differences throughout 2024, featuring both a line graph and a bar graph for enhanced clarity on trend and magnitude analysis. The line graph above highlights the temporal fluctuations, with notable decreases in early months followed by stabilization and a sharp increase towards the end of the year. The bar graph below complements this by visually emphasizing the month-to-month variance, clearly depicting the periods of relative stability and significant change. Together, these visualizations underscore the dynamic nature of pricing strategies in response to varying market conditions and external economic factors."
+#| echo: false
+
+ggplot4 <- ggplot(cleaned_data %>%
+                    group_by(year_month) %>%
+                    summarise(AveragePriceDiff = mean(price_diff, na.rm=TRUE)), aes(x=year_month, y=AveragePriceDiff)) +
+  geom_line(aes(group=1), color="red", size=1) +
+  geom_point(color="purple") +
+  labs(title="Average Price Difference Per Month", x="Month", y="Average Price Difference") +
+  theme_minimal()
+
+#Comparison of Average Prices Per Month
+ggplot5 <- ggplot(cleaned_data %>%
+                    group_by(year_month) %>%
+                    summarise(AveragePriceDiff = mean(price_diff, na.rm=TRUE)), aes(x=year_month, y=AveragePriceDiff)) +
+  geom_bar(stat="identity", fill="red") +
+  labs(title="Average Price Difference Per Month", x="Month", y="Average Price Difference") +
+  theme_minimal()
+
+grid.arrange(ggplot4, ggplot5, ncol=1)
+
+```
+
+The scatter plot in (@fig-ScatterOldAndCurrent) provides a detailed visualization of the relationship between old prices and current prices, marked by a notable positive correlation. The blue points represent individual data entries, dispersed across the plot, indicating the variety in how much old prices have influenced the current prices. The red line, representing a linear model fit, further underscores this relationship by showing a consistent upward trajectory, implying that higher old prices are typically associated with higher current prices.
+
+A more detailed observation of the plot reveals that while the general trend suggests a linear relationship, there are variations that could be indicative of other influencing factors such as market anomalies, supply and demand changes, or different pricing strategies applied during specific periods. The concentration of data points around the line suggests a strong correlation, yet the spread above and below the line could also hint at occasional significant deviations from the expected pricing pattern.
+
+```{r}
+#| label: fig-ScatterOldAndCurrent
+#| fig-cap: "Figure @fig-ScatterOldAndCurrent: This scatter plot displays the relationship between old prices and current prices, with a red line representing a linear fit that suggests a positive correlation. The distribution of points indicates that higher old prices are generally associated with higher current prices, reflecting potentially consistent market behavior or pricing strategies."
+#| echo: false
+
+# Visualization 7: Scatter Plot of Old Price vs. Current Price
+ggplot(cleaned_data, aes(x=old_price, y=current_price)) +
+  geom_point(alpha=0.5, color="blue") +
+  labs(title="Scatter Plot of Old Price vs. Current Price", x="Old Price", y="Current Price") +
+  theme_minimal() +
+  stat_smooth(method="lm", se=FALSE, color="red", show.legend=FALSE)
+
+
+```
+
+
+```{r}
+#| label: fig-Density
+#| fig-cap: "Figure @fig-Density: This density plot displays the distributions of old and current prices. The blue curve represents old prices with a concentrated peak at lower values, while the red curve for current prices shows a higher peak and greater dispersion. The comparison highlights shifts towards higher price ranges and increased variability in recent pricing strategies."
+#| echo: false
+
+ggplot(cleaned_data) +
+  geom_density(aes(x=old_price, fill="Old Price"), alpha=0.5) +
+  geom_density(aes(x=current_price, fill="Current Price"), alpha=0.5) +
+  labs(title="Density Plot of Old and Current Prices", x="Price", y="Density") +
+  scale_fill_manual(values=c("Old Price"="red", "Current Price"="blue")) +
+  theme_minimal()
+
+
+```
+
+The density plot depicted in (@fig-Density) visually compares the distribution of old and current prices. The plot is marked by two distinct, overlapping density curves: the blue curve for old prices and the red curve for current prices.
+
+The blue curve peaks sharply around the price point of 6, suggesting a high concentration of older prices within a lower range. This peak diminishes as the price increases, reflecting a limited occurrence of higher old prices. Conversely, the red curve, representing current prices, shows its peak around the price of 8, indicating that the most frequent current prices are higher than the most frequent old prices. The broader base and multiple peaks of the red curve also suggest a greater variability in current prices compared to the past.
+
+The intersection of the two curves represents price points that are consistent between the two time periods, highlighting some stability in certain pricing segments. The observed shifts in the peaks and the broader spread in the current prices suggest an overall trend toward price increases and greater variability in pricing strategies over time.
 
 
 
 
+The boxplot depicted in Figure @fig-BoxplotVendors provides a detailed comparative analysis of the distribution of current prices by different vendors: Loblaws, Metro, NoFrills, and Walmart. The visualization employs different colors to differentiate each vendor, which helps in quickly assessing the pricing landscape as outlined by their respective market positioning.
+
+Detailed Analysis:
+
+Loblaws (Red): The boxplot for Loblaws indicates a median price slightly above 6 dollars, with the interquartile range (IQR) extending from just under 5 dollars to just over 7 dollars. This suggests a moderate price spread. The presence of outliers below 4 dollars and near $8 points to some exceptional pricing instances that are significantly lower or higher than the typical range. This could imply promotional deals or premium product offerings that diverge from their standard price points.
+Metro (Green): Metro displays a slightly lower median price than Loblaws, hovering around 6 dollars. The IQR is tighter, ranging from about 5 dollars to 7 dollars, with fewer outliers, suggesting a more consistent pricing strategy with less variation in product pricing. This could indicate a stable market strategy aimed at maintaining a steady customer base through consistent pricing.
+NoFrills (Cyan): With the lowest median price just below 6 dollars, and a very narrow IQR from 5 dollars to around 6.5 dollars, NoFrills positions itself as the most budget-friendly option among the compared vendors. The limited range and fewer outliers signify a focused approach to pricing, potentially appealing to cost-conscious consumers looking for consistent low prices.
+Walmart (Purple): Walmart shows the highest median price at close to 7 dollars and a wider IQR that stretches from around 5 dollars to 8 dollars. This broad range and outliers on both ends suggest a diverse product offering that spans from more affordable to premium options. Walmart’s pricing strategy appears to accommodate a wide array of consumer demographics, from budget shoppers to those willing to pay more for higher-end products.
 
 
+```{r}
+#| label: fig-BoxplotVendors
+#| fig-cap: "Figure @fig-BoxplotVendors: This boxplot visualizes the current price distribution across four major vendors: Loblaws, Metro, NoFrills, and Walmart. Each vendor's price range, median, and variability are distinctly displayed, illustrating differences in pricing strategies and market positioning. The presence of outliers in certain vendors underscores occasional price extremes that deviate from the typical range."
+#| echo: false
+
+ggplot(cleaned_data, aes(x = vendor, y = current_price, fill = vendor)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Current Prices by Vendor",
+       x = "Vendor",
+       y = "Current Price ($)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+The bar chart in Figure @fig-BarchartBrands illustrates the average current prices of various egg brands, showing significant price variation across different brands. The chart is organized in ascending order of price from left to right, offering a visual comparison of brand pricing strategies within the market.
+
+Detailed Analysis:
+
+Lowest Priced Brands: The bar for "No Name" is the shortest, indicating it has the lowest average price among the brands represented. This suggests that "No Name" is positioned as a budget-friendly option in the market.
+
+Middle Range Brands: Brands like "Great Value," "Burnbrae Farms," "Gray Ridge," and "PC Blue Menu" exhibit mid-range prices. These brands likely balance between affordability and perceived quality, targeting middle-income consumers.
+
+Highest Priced Brands: "Selection" and "GoldEgg" appear at the higher end of the pricing spectrum, as indicated by their taller bars. These brands might be positioned as premium options, possibly offering organic or free-range eggs, which typically command higher prices.
+Variability and Market Positioning:
+
+The chart shows a wide range of pricing strategies, from economical to premium, reflecting the diverse consumer base and varied consumer preferences in the egg market. Each brand's position on the chart directly relates to its market segmentation strategy, aiming at specific demographic groups based on their spending ability and preference for quality.
+The use of color for each brand enhances visual differentiation and helps to quickly associate each bar with its respective brand. This is particularly useful in distinguishing between brands that might offer similar products but at different price points.
+
+```{r}
+#| label: fig-BarchartBrands
+#| fig-cap: "Figure @fig-BarchartBrands: This bar chart displays the average current prices of various egg brands, arranged in ascending order. It highlights the broad range of pricing strategies from budget to premium within the egg market. The visualization aids in understanding how each brand positions itself in terms of price relative to perceived quality and market segmentation."
+#| echo: false
+
+# Grouping data by brand and calculating the average current price
+brand_price <- cleaned_data %>%
+  group_by(brand) %>%
+  summarise(Average_Current_Price = mean(current_price, na.rm = TRUE)) %>%
+  arrange(Average_Current_Price)
+#Visualization 11: Bar chart of brands
+ggplot(brand_price, aes(x = reorder(brand, Average_Current_Price), y = Average_Current_Price, fill = brand)) +
+  geom_col() +
+  labs(title = "Average Current Price by Brand",
+       x = "Brand",
+       y = "Average Current Price") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust text angle for better readability
+
+```
 
 
 # Model
@@ -118,30 +269,86 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+The objective of this analysis is to employ a **linear regression model** in R to predict the current price of egg products (`current_price`) based on historical pricing data and contextual factors. The outcome variable, `current_price`, is continuous and represents the most recent selling price of egg products across different vendors.
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
+## Mathematical Representation
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+The model is mathematically represented as:
 
+$$
+current\_price_i = \beta_0 + \beta_1 \cdot old\_price_i + \sum (\beta_{brand_j} \cdot brand_{ij}) + \sum (\beta_{vendor_k} \cdot vendor_{ik}) + \sum (\beta_{month_l} \cdot month_{il}) + \epsilon_i
+$$
 
-### Model justification
+Where:
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+- **$current\_price_i$**: The observed current price of egg products for the i-th entry in the dataset.
+- **$old\_price_i$**: The previous recorded price of the product, reflecting historical price trends.
+- **$\beta_{brand_j} \cdot brand_{ij}$**: Represents the categorical effect of product brands, capturing unique pricing strategies or brand reputation influences.
+- **$\beta_{vendor_k} \cdot vendor_{ik}$**: Accounts for pricing differences between vendors (e.g., Walmart, Loblaws), representing the unique market dynamics of each store.
+- **$\beta_{month_l} \cdot month_{il}$**: Captures monthly variations in pricing, reflecting potential seasonal promotions or market demand shifts.
+- **$\epsilon_i$**: The error term, assumed to follow a normal distribution with mean 0 and constant variance, accounting for unexplained variability.
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
+This setup allows us to explore how historical prices, brand, vendor, and month collectively influence current prices, providing a basis for strategic pricing and market analysis.
+
+## Model Justification
+
+A linear regression model was chosen for this analysis to predict the current price of egg products (`current_price`) based on historical prices and contextual factors. This approach balances interpretability and efficiency, making it well-suited for analyzing pricing data where relationships among predictors (e.g., old price, brand, vendor, and month) can be reasonably approximated as linear.
+
+The decision to use linear regression stems from its ability to provide clear insights into the contribution of individual predictors. Historical price (`old_price`) is a strong determinant of current price, as trends in pricing are often sustained over time. Additionally, categorical variables such as `brand`, `vendor`, and `month` capture market dynamics, including differences in branding strategies, vendor pricing policies, and potential seasonal variations.
+
+While alternative modeling approaches, such as machine learning techniques or Bayesian regression, could also be considered, linear regression offers distinct advantages in this context:
+
+**Interpretability**: The model’s coefficients directly quantify the impact of each predictor on the outcome variable, facilitating straightforward conclusions about pricing influences.
+
+**Efficiency**: Linear regression is computationally efficient and performs well with datasets that are adequately sized for the number of predictors.
+
+**Simplicity**: With limited predictors, linear regression avoids overfitting and provides robust estimates without the need for extensive tuning or computational overhead.
+
+Machine learning techniques, such as decision trees or neural networks, were not selected due to their potential complexity and reduced interpretability. While these models excel at capturing non-linear relationships, they often require larger datasets to generalize effectively and risk overfitting with smaller data. Bayesian regression, on the other hand, introduces flexibility through prior distributions but adds complexity that may not be necessary for this dataset, where strong prior knowledge or uncertainty quantification is less critical.
+
+Linear regression also aligns with the goal of understanding the underlying factors driving egg product pricing. By focusing on the relationships between historical prices, brand effects, vendor strategies, and monthly variations, the model sheds light on actionable insights for stakeholders in the retail market.
+
+This choice ensures a balance between statistical rigor and practical application, making it a reliable and interpretable tool for price prediction in the egg product market.
+
+## Assumptions and Limitations
+
+Linear regression makes several key assumptions that must be considered when interpreting the results. First, it assumes a linear relationship between the predictors (e.g., old price, brand, vendor, and month) and the outcome variable (current price). While this assumption provides simplicity and interpretability, it may not fully capture more complex, non-linear relationships in the data. If significant non-linear trends exist, the model’s predictions could be biased or imprecise.
+
+Another critical assumption is that the residuals (the differences between observed and predicted prices) are independent and identically distributed (i.i.d.) with constant variance (homoscedasticity). Violations of this assumption, such as heteroscedasticity (where variance changes with predictor levels) or autocorrelation (where residuals are correlated), could indicate model misspecification or the need for transformation or additional variables. Diagnostic checks such as residual plots are necessary to validate these assumptions.
+
+The model also assumes that all relevant predictors affecting the current price have been included. Factors such as unrecorded promotions, sudden market disruptions, or broader economic changes may not be reflected in the data, potentially leading to omitted variable bias. Additionally, the dataset’s granularity may limit the ability to capture more subtle or localized pricing influences.
+
+Outliers pose another limitation. Extreme values in `current_price` or `old_price` can exert undue influence on the regression coefficients, potentially skewing the results. While linear regression is sensitive to outliers, robust diagnostics and preprocessing steps, such as trimming or winsorizing, can mitigate this issue.
+
+The model presumes that relationships between predictors and the outcome variable remain consistent across the dataset. However, if subgroups exist, such as differences in pricing strategies among premium and budget brands or regional vendor variations, the model may fail to account for these dynamics without additional interaction terms or hierarchical structures.
+
+Lastly, the model’s generalizability depends on the representativeness of the data. If the dataset does not adequately reflect the diversity of brands, vendors, or seasonal conditions, predictions may not extend well to unseen or new contexts. For example, shifts in consumer behavior or external market trends could limit the model’s applicability over time.
+
+While linear regression provides an efficient and interpretable framework for predicting current prices, these assumptions and limitations emphasize the importance of robust data preparation, diagnostic validation, and cautious interpretation of the results. Proper attention to these factors will ensure the model’s findings are both meaningful and actionable.
+
+## Model Validation
+
+To validate the linear regression model, several diagnostic and evaluation steps were performed to ensure its reliability and effectiveness:
+
+- **Training and Testing Split**: The dataset was divided into training (80%) and testing (20%) subsets. The model was trained on the training set and its predictive performance was evaluated on the test set. This split helps assess how well the model generalizes to new, unseen data.
+
+- **Root Mean Square Error (RMSE)**: RMSE was calculated on both the training and testing sets to measure the average prediction error. A small difference between the two RMSE values indicates that the model is not overfitting and generalizes well to new data.
+
+- **Residual Analysis**: Residuals (differences between observed and predicted values) were plotted against predicted values. The absence of patterns in the residuals suggests that the assumptions of linearity and homoscedasticity (constant variance of residuals) hold. Additionally, residual histograms and Q-Q plots were used to check for normality of residuals.
+
+- **Adjusted R-Squared**: The adjusted R-squared was used to evaluate how well the predictors collectively explain the variability in the current price, while accounting for the number of predictors in the model.
+
+- **Multicollinearity Check**: Variance Inflation Factor (VIF) was calculated for all predictors to identify multicollinearity. Predictors with VIF values above 5 were flagged for further review to ensure the stability of coefficient estimates.
+
+### Limitations of Validation
+
+While the above steps provide a robust framework for validating the model, it is important to note that linear regression has inherent limitations. For example, the assumption of linearity may not fully capture complex relationships, and the presence of outliers can disproportionately influence the model. Furthermore, the representativeness of the training data plays a critical role in determining the accuracy of predictions when applied to new data.
+
+Overall, these validation techniques ensure that the linear regression model is robust, interpretable, and performs well within the constraints of the dataset.
 
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
 
 ```{r}
 #| echo: false
@@ -156,39 +363,143 @@ first_model <-
 ```
 
 ```{r}
+#| label: tbl-sumy
+#| fig-cap: "Scatter plot @fig-Scatter showing Actual vs Predicted values. Points should align along the red dashed line (y = x) if predictions are perfect. The blue line shows the smoothed trend of the relationship, and the gray band represents the 95% confidence interval."
 #| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
+library(broom)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+model_summary <- tidy(first_model)
+
+model_summary %>%
+  kable("latex", caption = "Model Coefficients Summary") %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE,
+    font_size = 12
+  ) %>%
+  column_spec(1, bold = TRUE) 
+
+```
+
+The results of the linear regression model in [@tbl-sumy] highlight significant brand-specific effects on current prices. Brands such as Gold Egg demonstrate the highest positive effect (estimate = 1.42, p < 0.001), reflecting their premium positioning in the market. In contrast, budget brands like No Name (estimate = -0.91, p = 0.0017) and PC Blue Menu (estimate = -1.01, p < 0.001) are associated with significantly lower prices, appealing to cost-conscious consumers. Some brands, including Great Value and Green Valley, show coefficients that are not statistically significant, indicating negligible pricing differences compared to the baseline brand.
+
+This analysis, illustrated in \@ref(tbl-sum), emphasizes the role of brand differentiation in pricing strategies. Premium brands maintain higher pricing, likely due to perceived quality or marketing strategies, whereas budget brands cater to price-sensitive market segments. The findings suggest that pricing strategies should consider brand positioning and consumer perception to optimize revenue and market share.
+
+
+```{r}
+#| label: fig-Scatter
+#| fig-cap: "Scatter plot @fig-Scatter showing Actual vs Predicted values. Points should align along the red dashed line (y = x) if predictions are perfect. The blue line shows the smoothed trend of the relationship, and the gray band represents the 95% confidence interval."
+#| echo: false
+
+ggplot(data.frame(actual = cleaned_data$current_price, 
+                  predicted = predict(first_model, newdata = cleaned_data)), 
+       aes(x = actual, y = predicted)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  geom_smooth(method = "loess", se = TRUE, color = "blue") +
+  labs(x = "Actual Current Price", 
+       y = "Predicted Current Price",
+       title = "Actual vs Predicted Values") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12, face = "bold"))
+
+
 ```
 
 
+The scatter plot in @fig-Scatter compares the actual and predicted current prices. Ideally, the points should align along the red dashed line, representing perfect predictions (y = x). The majority of points cluster near this line, indicating that the model captures the overall relationship between actual and predicted prices well. However, deviations from the line suggest instances where the model's predictions either underestimate or overestimate the actual prices.
 
+The blue smoothed line, with its 95% confidence interval shaded in gray, highlights the trend in the relationship. While the model generally performs well in the mid-range of actual prices, a slight deviation from linearity is observed at the higher price ranges, where the blue line dips below the red line. This suggests that the model may overpredict prices at higher ranges or that nonlinear effects not captured by the linear model are influencing the results.
+
+Overall, the plot underscores the effectiveness of the model in predicting current prices while highlighting areas where improvements, such as incorporating nonlinear relationships or additional predictors, could enhance performance. The residual patterns in higher price ranges suggest further investigation may be needed to account for these discrepancies.
+
+
+```{r}
+#| label: fig-bran
+#| fig-cap: "Brand effects on price showing estimated coefficients from the linear model. Positive values indicate brands associated with higher prices, while negative values indicate lower prices relative to the baseline brand."
+#| echo: false
+
+broom::tidy(first_model) %>%
+  filter(str_detect(term, "brand")) %>%
+  mutate(
+    term = str_remove(term, "brand"),
+    term = reorder(term, estimate)
+  ) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(x = "Brand", 
+       y = "Price Effect (Coefficient)",
+       title = "Brand Effects on Price") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12, face = "bold"))
+
+```
+
+The bar chart in (@fig-bran) visualizes the influence of different brands on current prices based on the estimated coefficients from the linear regression model. Positive coefficients indicate that a brand is associated with higher prices compared to the baseline, while negative coefficients indicate lower prices.
+
+Gold Egg stands out as the most premium brand, with a substantial positive effect on price (coefficient ~ 1.5). This suggests that products under this brand command significantly higher prices, likely due to strong brand reputation, higher quality perception, or market positioning. Green Valley and Conestoga Farms also show slight positive effects, indicating their positioning as mid-to-premium range brands.
+
+In contrast, brands like No Name and PC Blue Menu exhibit the largest negative effects, with coefficients around -0.9 and -1.0, respectively. These brands likely target price-sensitive consumers and adopt a low-cost pricing strategy. Other brands, such as Gray Ridge and Burnbrae Farms, show moderate negative effects, suggesting their pricing falls below the baseline but remains less aggressive than purely budget brands.
+
+Overall, the chart demonstrates a clear segmentation of pricing strategies among brands. Premium brands leverage higher perceived value to justify elevated prices, while budget brands cater to a cost-conscious demographic. These insights highlight the importance of branding in shaping pricing strategies and market positioning.
+
+
+```{r}
+#| label: fig-res
+#| fig-cap: "Residual plot showing model diagnostics. Points should be randomly scattered around the zero line (red dashed) with no clear pattern. The blue line shows the smoothed trend of residuals, and the gray band represents the 95% confidence interval."
+#| echo: false
+
+ggplot(data.frame(fitted = fitted(first_model),
+                                  resid = residuals(first_model)), 
+                       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  geom_smooth(method = "loess", se = TRUE, color = "blue") +
+  labs(x = "Fitted Values", 
+       y = "Residuals",
+       title = "Residual Distribution") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12, face = "bold"))
+```
+
+The residual plot in (@fig-res) assesses the model's performance by examining the residuals (differences between observed and predicted values) against the fitted values. Ideally, the points should be randomly scattered around the horizontal zero line (red dashed), indicating that the model captures the relationship without systematic bias.
+
+The plot shows no apparent strong patterns or trends in the residuals, suggesting that the assumption of linearity is reasonably upheld. However, there is slight variability at the extremes of fitted values, where some points deviate more substantially. This could indicate heteroscedasticity or potential model limitations in accurately capturing variability at lower and higher fitted values.
+
+The blue smoothed line provides a trend of the residuals, staying close to the zero line across most of the range, with minimal curvature. This indicates that while the model performs well overall, slight deviations at the boundaries could suggest areas for improvement. The gray confidence band confirms that most residuals lie within expected bounds, reinforcing the reliability of the model for most data points.
+
+In conclusion, the residuals' random distribution supports the validity of the model assumptions, with minor deviations at the edges warranting further examination to enhance predictive accuracy in extreme cases.
 
 # Discussion
 
-## First discussion point {#sec-first-point}
+## Summary of Research
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+This paper investigates the dynamics of egg pricing across major Canadian grocery retailers, employing a linear regression model to analyze the influence of brand, vendor, and temporal factors on pricing. By focusing on the interactions between these variables, the study provides insights into the pricing strategies adopted by different brands and their impact on market prices. This approach allows us to quantify the effects of marketing and brand positioning within a competitive retail environment.
 
-## Second discussion point
+## Insights into Consumer Behavior
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+One significant insight from this research is the impact of brand perception on consumer purchasing decisions. Premium brands like "Gold Egg" command higher prices, which reflects a consumer willingness to pay more for perceived quality. This finding underscores the importance of brand management in retail strategies and offers evidence of how brand strength can influence pricing power in the market.
 
-## Third discussion point
+## Insights into Market Dynamics
 
-## Weaknesses and next steps
+Another key insight is the role of vendor strategies and seasonal variations in shaping pricing trends. The study highlights how vendors adjust prices in response to market demands and seasonal peaks, such as holiday periods when egg consumption typically increases. Understanding these patterns helps retailers and policymakers predict consumer behavior and adjust supply chains accordingly, optimizing both profitability and consumer satisfaction.
 
-Weaknesses and next steps should also be included.
+## Limitations of the Study
+
+While the research provides valuable insights, it is not without limitations. The reliance on linear regression may oversimplify the complex interactions within the market, potentially missing non-linear relationships or interactive effects between brands and market conditions. Additionally, the model assumes that all significant predictors are included, which may not account for unobserved variables such as local market disruptions or specific promotional activities.
+
+## Future Research Directions
+
+Future studies should consider more complex models that can handle non-linear interactions and higher-dimensional data to better capture the intricacies of market behavior. Exploring models like mixed-effects models or advanced machine learning techniques could provide deeper insights into the predictive factors of pricing. Furthermore, expanding the dataset to include more granular regional and demographic data could refine the accuracy of the findings and enhance the generalizability of the results.
+
+## Conclusion
+
+This paper advances our understanding of the factors influencing egg prices in Canadian retail markets, revealing significant effects of brand and vendor strategies on pricing. It highlights the necessity for robust brand management and strategic pricing to navigate the competitive retail landscape. The findings from this study not only inform retail management strategies but also offer a foundation for future research aimed at exploring deeper market mechanisms and refining economic models in the retail sector.
 
 \newpage
 
@@ -196,58 +507,129 @@ Weaknesses and next steps should also be included.
 
 # Appendix {-}
 
+## Egg Price Prediction Methodology
 
-# Additional data details
+Target Population and Sample Design
+The target population for this study includes egg prices from Canada’s four major retailers—Loblaws, Metro, Walmart, and NoFrills—covering three key categories: organic eggs, free-range eggs, and conventional eggs. These categories represent the primary purchasing behaviors of consumers and capture price variations based on production methods [@CanadianAgriculturalOutlook2023]. To ensure comprehensive data coverage, both offline and online data sources are utilized. Offline, the sampling frame includes stores located in urban, suburban, and rural areas to account for regional pricing differences. Online, the sampling frame consists of product pages from the retailers’ websites, capturing promotional activities and regional pricing adjustments displayed on digital platforms [@Brown2020].
 
-# Model details {#sec-model-details}
+For each retailer, a systematic sampling method will be used, with stratification by geographic region (e.g., Western, Central, and Eastern Canada) and store size (e.g., small, medium, large). Approximately 50 stores will be selected for each retailer, resulting in a total sample size of around 200 stores [@StatisticsCanada2023]. Additionally, considering that prices fluctuate over time, data collection will occur weekly over a three-month period. This frequency will allow for capturing short-term price variations caused by seasonal demand, supply chain disruptions, and promotional activities [@KumarEtAl2022].
 
-## Posterior predictive check
+Data Collection Methods
+Staff members will conduct weekly visits to designated stores to collect price data for various egg categories, including organic, free-range, and conventional eggs. Data will be recorded at different times of the day to capture price discrepancies caused by demand or promotional timing. Collected information includes current prices, promotional prices, and unit prices. To ensure consistency, all data collectors will use a standardized template for recording observations [@FieldMethodsHandbook2021].
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+Additionally, web scraping tools will be employed to extract pricing information from the retailers’ websites, including egg prices, product descriptions, specifications, and current promotional details [@Brown2020]. These online data points need to be updated daily, especially during holidays or other periods with frequent changes in promotional activities. Finally, online or phone surveys may be conducted with store managers to understand current promotion schedules, regional pricing strategies, and inventory levels, compensating for dynamic information that observational data cannot directly capture [@Tukey1977].
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+Data Validation
+To ensure the quality and reliability of the data, the following validation steps will be implemented:
 
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
+Cross-Validation of Data Sources
+By comparing offline and online data for consistency, discrepancies will be investigated to select the most reliable and accurate data.
+Outlier Detection and Handling
+Statistical methods, such as z-scores, will be applied to identify outliers in price data. These outliers will be manually reviewed through field checks or ignored in cases where they are likely due to temporary factors like holiday discounts [@Tukey1977].
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
+Weighting Adjustments
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
+Data will be weighted based on store size, regional consumer demographics, and purchasing power. Weighting standards will be based on relevant data from Statistics Canada to ensure that the sample accurately reflects national consumer behavior [@StatisticsCanada2023].
+Seasonal Adjustments
+Historical price trends will be analyzed to account for seasonal variations. For example, during holidays like Easter or Thanksgiving, increased demand may lead to temporary price spikes.
+Advantages and Limitations
+Combining offline observations, online scraping, and survey data allows this methodology to capture a multi-dimensional view of egg prices, including regional, categorical, and promotional timing differences [@Brown2020]. Weekly data collection provides detailed insights into short-term trends, while stratified sampling ensures representation across Canada’s diverse regions. Automated web scraping reduces the time and labor required for data collection. However, regional disparities in tax policies, transportation costs, and consumer behavior may create challenges for ensuring balanced data. Collecting offline data requires significant human resources, making it difficult to cover all stores, particularly those in remote areas. Additionally, online data may lack accuracy and may not fully reflect actual inventory and prices in physical stores. Promotional information may also vary by region, introducing further variability [@Brown2020].
 
-## Diagnostics
+Conclusion
+This methodology integrates observational data, surveys, and online scraping techniques to establish a robust and detailed framework for predicting egg prices. By employing systematic sampling, rigorous data validation, and weighted adjustments, it provides accurate and reliable insights into price trends [@CanadianAgriculturalOutlook2023]. Despite challenges such as regional disparities, this methodology ensures actionable and detailed findings, with the potential for application in forecasting prices for other products.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+suvery link：https://forms.gle/eQ7YW8sKcjm4qGyMA
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+Copy of survey:
+Egg Consumption Behavior Survey 
 
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+Hello! We are conducting a survey about egg consumption behavior. Your responses will provide
+valuable data for our research. The survey will take approximately 5–8 minutes to complete. All
+information will be kept condential and used solely for research purposes.
 
-plot(first_model, "trace")
+If you have any questions or would like to follow up on the survey, please contact us: Email:
+eggsurvey@researchteam.com
+Phone: 6476256706 
 
-plot(first_model, "rhat")
-```
+1.What is your age? 
+A.Under 18 
+B.18–29 years
+C.30–39 years
+D.40–49 years
+E.50 years and above
+
+2.What is your gender? 
+A. Male
+B.Female
+C..Other:
+
+3.Where do you live? 
+A.Urban area
+B.Suburban area
+C.Rural area
+
+4.What is your approximate household monthly expenditure? 
+A.Less than `$2000`
+B.`$2000–$4000`
+C.`$4000–$6000`
+D.More than `$6000`
+
+5.On average, how many eggs do you or your household purchase per week? 
+A.Less than 6 
+B.6–12 
+C.13–24 
+D.More than 24 
+
+6.Which types of eggs do you prefer to purchase? (Select all that apply) 
+Check all that apply.
+A.Organic eggs
+B.Free-range eggs
+C.Regular eggs
+D.Other
+
+7.Where do you usually purchase eggs? (Select all that apply) 
+
+A.Supermarkets (e.g., Loblaws, Walmart)
+B.Farmers’ markets
+C. Local grocery stores
+D.Online platforms
+
+8.Rank the following factors in terms of importance when choosing an egg brand or type 
+(1 = most important, 5 = least important) :Price 
+1 2 3 4 5 
+
+9. Rank the following factors in terms of importance when choosing an egg brand or 
+type (1 = most important, 5 = least important) :Origin 
+1 2 3 4 5
+
+10. Rank the following factors in terms of importance when choosing an egg brand or 
+type (1 = most important, 5 = least important) :Organic/free-range certification 
+1 2 3 4 5 
+
+11. Rank the following factors in terms of importance when choosing an egg brand or 
+type (1 = most important, 5 = least important) :Taste and quality 
+1 2 3 4 5 
+
+12. Where and at what price did you last purchase eggs? 
+description: 
+
+13. If egg prices increased significantly (e.g., by more than 20%), how would your purchasing behavior change? 
+
+description:
+
+14.Do you feel that current egg prices are reasonable? 
+1 2 3 4 5 
+
+15. Do you have any expectations regarding the quality or production standards of 
+eggs?
+
+1 2 3 4 5 
+
+Thank you for taking the time to complete this survey. Your insights are invaluable to our 
+research. If you have any questions, need further assistance, or would like to share 
+additional feedback, please feel free to contact us at: 
+Email: eggsurvey@researchteam.com Phone: 6476256706 
+We deeply appreciate your participation and support!
 
 
 
